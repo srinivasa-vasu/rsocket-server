@@ -27,12 +27,12 @@ public class QuoteGenerator {
 		PVTL("PVTL", 11.59),
 		VMW("VMW", 169.60),
 		DELL("DELL", 54.99),
-		GOOGL("GOOGL", 1_064.54),
-		MSFT("MSFT", 131.58),
-		AAPL("AAPL", 199.80),
 		FB("FB", 189.50),
+		AAPL("AAPL", 199.80),
+		AMZN("AMZN", 1_904.28),
 		NFLX("NFLX", 370.02),
-		AMZN("AMZN", 1_904.28);
+		GOOGL("GOOGL", 1_064.54),
+		MSFT("MSFT", 131.58);
 		// @formatter:on
 
 		private String ticker;
@@ -64,8 +64,8 @@ public class QuoteGenerator {
 	QuoteGenerator() {
 		stream(EntQuote.values()).forEach(e -> this.prices.add(
 				new Quote(e.getTicker(), new BigDecimal(e.getPrice(), this.mathContext),
-						Instant.now(), counter.incrementAndGet())));
-		this.quoteStream = Flux.interval(Duration.ofSeconds(1))
+						Instant.now(), counter.get())));
+		this.quoteStream = Flux.interval(Duration.ofSeconds(1)).onBackpressureDrop()
 				.flatMap((e) -> Flux.fromIterable(prices.stream().map(baseQuote -> {
 					BigDecimal priceChange = baseQuote.getPrice().multiply(
 							new BigDecimal(0.05 * this.random.nextDouble()),
@@ -95,3 +95,6 @@ public class QuoteGenerator {
 	}
 
 }
+
+
+
