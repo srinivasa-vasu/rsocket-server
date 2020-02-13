@@ -66,14 +66,14 @@ public class QuoteGenerator {
 				new Quote(e.getTicker(), new BigDecimal(e.getPrice(), this.mathContext),
 						Instant.now(), counter.get())));
 		this.quoteStream = Flux.interval(Duration.ofSeconds(1)).onBackpressureDrop()
-				.flatMap((e) -> Flux.fromIterable(prices.stream().map(baseQuote -> {
+				.flatMap(e -> Flux.fromIterable(prices.stream().map(baseQuote -> {
 					BigDecimal priceChange = baseQuote.getPrice().multiply(
 							new BigDecimal(0.05 * this.random.nextDouble()),
 							this.mathContext);
 					return new Quote(baseQuote.getTicker(),
 							baseQuote.getPrice().add(priceChange), Instant.now(),
 							counter.incrementAndGet());
-				}).collect(Collectors.toList()))).share();
+				}).collect(Collectors.toList()))).share().cache().retry();
 	}
 
 	public Flux<Quote> getQuoteStream() {
@@ -81,8 +81,7 @@ public class QuoteGenerator {
 	}
 
 	public Mono<Quote> getQuote(String symbol) {
-		return quoteStream.takeWhile(quote -> quote.getTicker().equalsIgnoreCase(symbol))
-				.take(1).switchIfEmpty(Mono.just(new Quote())).single();
+		return getQuoteStream(symbol).take(1).single();
 	}
 
 	public Flux<Quote> getQuoteStream(String symbol) {
@@ -95,6 +94,3 @@ public class QuoteGenerator {
 	}
 
 }
-
-
-

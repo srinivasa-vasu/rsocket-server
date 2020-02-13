@@ -2,3 +2,6 @@ spring:
   rsocket:
     server:
       port: 8000
+      mapping-path: "/rsocket"
+      transport: WEBSOCKET
+
