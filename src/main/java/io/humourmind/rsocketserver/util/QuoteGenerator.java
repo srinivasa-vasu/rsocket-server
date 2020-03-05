@@ -73,7 +73,7 @@ public class QuoteGenerator {
 					return new Quote(baseQuote.getTicker(),
 							baseQuote.getPrice().add(priceChange), Instant.now(),
 							counter.incrementAndGet());
-				}).collect(Collectors.toList()))).share().cache().retry();
+				}).collect(Collectors.toList()))).share().cache(Duration.ofSeconds(10));
 	}
 
 	public Flux<Quote> getQuoteStream() {
